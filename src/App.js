@@ -6,66 +6,65 @@ import './App.css'
 const data = [
   // {
   //   "id": 1,
-  //   "mall": "V R mall",
-  //   "address": "Surat",
-  //   "rating": "A"
+  //   "name": "foo",
+  //   "city": "dallas",
+  //   "category": "one",
+  //   "type": "A",
+  //   "Active": "FALSE"
   // },
   // {
   //   "id": 2,
-  //   "mall": "Rahul Raj Mall",
-  //   "address": "dallas",
-  //   "rating": "B"
+  //   "name": "bar",
+  //   "city": "dallas",
+  //   "category": "one",
+  //   "type": "B",
+  //   "Active": "FALSE"
   // },
   // {
   //   "id": 3,
-  //   "mall": "Raj Imperial",
-  //   "address": "san francisco",
+  //   "name": "jim",
+  //   "city": "san francisco",
   //   "category": "one",
-  //   "rating": "B"
+  //   "type": "B",
+  //   "Active": "TRUE"
   // },
   // {
   //   "id": 4,
-  //   "mall": "Jane",
-  //   "address": "denver",
+  //   "name": "jane",
+  //   "city": "denver",
   //   "category": "two",
-  //   "rating": "C"
-  // }
+  //   "type": "C",
+  //   "Active": "FALSE"
+  // },
   {
     "id": 1,
-    "name": "foo",
-    "city": "dallas",
-    "catagory": "one",
-    "type": "A",
-    "Active": "FALSE"
-  },
-  {
+    "mall": "V R mall",
+    "address": "Surat",
+    "rating": "A"
+},
+{
     "id": 2,
-    "name": "bar",
-    "city": "dallas",
-    "catagory": "one",
-    "type": "B",
-    "Active": "FALSE"
-  },
-  {
+    "mall": "Rahul Raj Mall",
+    "address": "dallas",
+    "rating": "B"
+},
+{
     "id": 3,
-    "name": "jim",
-    "city": "san francisco",
-    "catagory": "one",
-    "type": "B",
-    "Active": "TRUE"
-  },
-  {
+    "mall": "Raj Imperial",
+    "address": "san francisco",
+    "category": "one",
+    "rating": "B"
+},
+{
     "id": 4,
-    "name": "jane",
-    "city": "denver",
-    "catagory": "two",
-    "type": "C",
-    "Active": "FALSE"
-  }
+    "mall": "Jane",
+    "address": "denver",
+    "category": "two",
+    "rating": "C"
+}
 ];
 
 const getFilterKeys = (data) => {
-  console.log("sanfdf", data)
   const allKeys = data.reduce((keys, item) => {
     return keys.concat(Object.keys(item)?.filter(key => !keys.includes(key)));
   }, []);
@@ -98,32 +97,35 @@ function App() {
     }));
   };
 
-
   useEffect(() => {
     let filtered = data?.filter(item => {
       return filterKeys.every(key => {
         const filterValue = filterValues[key];
-        // Check if the key exists in the item before comparing
-        return filterValue.length === 0 || (item[key] && filterValue.includes(item[key]));
+        return filterValue?.length === 0 || (item[key] && filterValue.includes(item[key]));
       }) &&
         ((item.name ? item.name.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
           (item.mall ? item.mall.toLowerCase().includes(searchTerm.toLowerCase()) : false));
     });
-    setFilteredData(filtered);
+  
+    setFilteredData(prevFilteredData => {
+      if (JSON.stringify(filtered) !== JSON.stringify(prevFilteredData)) {
+        return filtered;
+      }
+      return prevFilteredData;
+    });
   }, [data, filterKeys, filterValues, searchTerm]);
+  
 
 
   const handleToggleIcon = (key, option) => {
     const isChecked = filterValues[key].includes(option);
     handleFilterChange(key, option);
     if (isChecked) {
-      // If checked, uncheck
       setFilterValues(prev => ({
         ...prev,
         [key]: prev[key].filter(item => item !== option)
       }));
     } else {
-      // If unchecked, check
       setFilterValues(prev => ({
         ...prev,
         [key]: [...prev[key], option]
@@ -174,16 +176,16 @@ function App() {
       </div>
       <div className="row">
         <div className="col-md-12">
-          <DynamicTable data={filteredData} />
+          {filteredData?.length > 0 && <DynamicTable data={filteredData} />}
+          {filteredData?.length === 0 && <div>No data available</div>}
         </div>
       </div>
     </div>
   );
 }
 
-
 function DynamicTable({ data }) {
-  if (data.length === 0) return <div>No data available</div>;
+  if (data?.length === 0) return null;
 
   const tableKeys = [...getFilterKeys(data)];
   if (data.some(item => item.hasOwnProperty('name'))) {
