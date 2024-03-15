@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons';
+import './App.css'
 
 const data = [
   // {
@@ -34,34 +37,35 @@ const data = [
     "catagory": "one",
     "type": "A",
     "Active": "FALSE"
-},
-{
+  },
+  {
     "id": 2,
     "name": "bar",
     "city": "dallas",
     "catagory": "one",
     "type": "B",
     "Active": "FALSE"
-},
-{
+  },
+  {
     "id": 3,
     "name": "jim",
     "city": "san francisco",
     "catagory": "one",
     "type": "B",
     "Active": "TRUE"
-},
-{
+  },
+  {
     "id": 4,
     "name": "jane",
     "city": "denver",
     "catagory": "two",
     "type": "C",
     "Active": "FALSE"
-}
+  }
 ];
 
 const getFilterKeys = (data) => {
+  console.log("sanfdf", data)
   const allKeys = data.reduce((keys, item) => {
     return keys.concat(Object.keys(item)?.filter(key => !keys.includes(key)));
   }, []);
@@ -81,82 +85,102 @@ function App() {
   const [filterOptions, setFilterOptions] = useState(getFilterOptions(data, filterKeys));
   const [filteredData, setFilteredData] = useState(data);
   const [filterValues, setFilterValues] = useState(
-    filterKeys.reduce((acc, key) => ({ ...acc, [key]: '' }), {})
+    filterKeys.reduce((acc, key) => ({ ...acc, [key]: [] }), {})
   );
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleFilterChange = (key, value) => {
     setFilterValues(prev => ({
       ...prev,
-      [key]: value
+      [key]: prev[key].includes(value)
+        ? prev[key].filter(item => item !== value)
+        : [...prev[key], value]
     }));
   };
 
- useEffect(() => {
-  let filtered = data?.filter(item => {
-    return filterKeys.every(key => {
-      const filterValue = filterValues[key];
-      return filterValue !== '' ? item[key] && item[key].toString() === filterValue : true;
-    }) && 
-    ((item.name ? item.name.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
-    (item.mall ? item.mall.toLowerCase().includes(searchTerm.toLowerCase()) : false));
-  });
-  setFilteredData(filtered);
-}, [data, filterKeys, filterValues, searchTerm]);
+
+  useEffect(() => {
+    let filtered = data?.filter(item => {
+      return filterKeys.every(key => {
+        const filterValue = filterValues[key];
+        // Check if the key exists in the item before comparing
+        return filterValue.length === 0 || (item[key] && filterValue.includes(item[key]));
+      }) &&
+        ((item.name ? item.name.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+          (item.mall ? item.mall.toLowerCase().includes(searchTerm.toLowerCase()) : false));
+    });
+    setFilteredData(filtered);
+  }, [data, filterKeys, filterValues, searchTerm]);
 
 
+  const handleToggleIcon = (key, option) => {
+    const isChecked = filterValues[key].includes(option);
+    handleFilterChange(key, option);
+    if (isChecked) {
+      // If checked, uncheck
+      setFilterValues(prev => ({
+        ...prev,
+        [key]: prev[key].filter(item => item !== option)
+      }));
+    } else {
+      // If unchecked, check
+      setFilterValues(prev => ({
+        ...prev,
+        [key]: [...prev[key], option]
+      }));
+    }
+  };
 
-return (
-  <div className="container">
-    <div className="row">
-      <div className="col-md-12">
-        <div className="row">
-          {filterKeys.map(keyName => (
-            <div key={keyName} className="col-md-3 mb-3">
-              <div className="form-group">
-                <label>{keyName.charAt(0).toUpperCase() + keyName.slice(1)}</label>
-                <select
-                  className="form-control"
-                  value={filterValues[keyName]}
-                  onChange={(e) => handleFilterChange(keyName, e.target.value)}
-                >
-                  <option value="">All {keyName.charAt(0).toUpperCase() + keyName.slice(1)}</option>
-                  {filterOptions[keyName]
-                    ?.filter(option => option.trim() !== '')
-                    .map((option, index) => (
-                      <option key={index} value={option}>
-                        {option}
-                      </option>
-                  ))}
-                </select>
+  return (
+    <div className="container">
+      <div className="row">
+        <div className="col-md-12">
+          <div className="row">
+            {filterKeys.map(keyName => (
+              <div key={keyName} className="col-md-3 mb-3">
+                <div className="form-group">
+                  <div className="toggle-container">
+                    <label className="mainHead">{keyName.charAt(0).toUpperCase() + keyName.slice(1)}</label>
+                    {filterOptions[keyName]
+                      ?.filter(option => option.trim() !== '')
+                      .map((option, index) => (
+                        <div key={index} className="form-check">
+                          <label className="toggle-label" onClick={() => handleToggleIcon(keyName, option)}>
+                            <span className="icon-wrapper">
+                              <FontAwesomeIcon style={{ fontSize: '26px', color: 'gray' }} icon={filterValues[keyName].includes(option) ? faToggleOn : faToggleOff} />
+                            </span>
+                            <span className="option-name" style={{ marginBottom: '4px' }}>{option}</span>
+                          </label>
+                        </div>
+                      ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
-          <div className="col-md-3 mb-3">
-            <div className="form-group">
-              <label>Name</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search by name"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            ))}
+            <div className="col-md-3 mb-3">
+              <div className="form-group">
+                <label>Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search by name"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div className="row">
-      <div className="col-md-12">
-        <DynamicTable data={filteredData} />
+      <div className="row">
+        <div className="col-md-12">
+          <DynamicTable data={filteredData} />
+        </div>
       </div>
     </div>
-  </div>
-);
-
-
+  );
 }
+
 
 function DynamicTable({ data }) {
   if (data.length === 0) return <div>No data available</div>;

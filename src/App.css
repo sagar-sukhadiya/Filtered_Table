@@ -37,3 +37,71 @@
     transform: rotate(360deg);
   }
 }
+.form-group {
+  display: flex; 
+  align-items: flex-start; 
+}
+
+.mainHead {
+  margin-top: 30px;
+  margin-bottom: -40px;
+  margin-left: -40px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.toggle-container {
+  display: flex;
+  flex-direction: column; 
+}
+
+.toggle-label {
+  display: flex; 
+  align-items: center; 
+  cursor: pointer;
+  margin-right: 30px;
+}
+
+.vertical-line {
+  border-left: 1px solid black;
+  height: 100%;
+  margin: 0 10px;
+}
+
+
+.toggle-label .icon-wrapper {
+  margin-right: 5px; 
+}
+
+.toggle-label .option-name {
+  color: #333; 
+}
+
+.toggle-container {
+  position: relative; 
+}
+
+.toggle-container::before {
+  content: '';
+  position: absolute; 
+  top: 0; 
+  bottom: 0;
+  left: calc(120% - 2.5px); 
+  border-left: 2px solid #6b3a3a; 
+}
+
+.toggle-container .mainHead {
+  margin-right: 10px; 
+  display: inline-block;
+}
+
+.toggle-container .toggle-label {
+  margin-left: 20px; 
+}
+
+
+
+
+
+
+
